@@ -1,0 +1,2 @@
+g++ udp_microgate.cpp udp.cpp -lpthread -std=c++11
+g++ master.cpp udp.cpp -lpthread -o master
