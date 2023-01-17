@@ -1,2 +1,3 @@
 g++ udp_microgate.cpp udp.cpp -lpthread -std=c++11
 g++ master.cpp udp.cpp -lpthread -o master
+g++ -Wall -Wstrict-prototypes -fomit-frame-pointer -I ../include -O2 -o udp_microgate udp_microgate.cpp udp.cpp -lpthread 

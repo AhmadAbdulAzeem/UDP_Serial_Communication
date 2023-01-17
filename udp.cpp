@@ -53,10 +53,11 @@ int UdpServer::receiveUdpMessage()
 
     unsigned int length = sizeof(serverAddress);
     int readedBytes = recvfrom(server_socket_udp, data, _MaxDataSize, 0, (struct sockaddr *)&serverAddress, &length);
-
+    
     if (readedBytes > 0 )
     {
         return readedBytes;
+        this->dataLength = readedBytes;
     }
     return -1;
 }

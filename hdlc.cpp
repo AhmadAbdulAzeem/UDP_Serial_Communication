@@ -60,7 +60,7 @@ void configure_port(int fd) {
 	params.mode = MGSL_MODE_HDLC;
 	params.encoding = HDLC_ENCODING_NRZ;
 	params.crc_type = HDLC_CRC_16_CCITT;
-	params.loopback = 1;
+	params.loopback = 0;
 	params.flags = HDLC_FLAG_RXC_RXCPIN + HDLC_FLAG_TXC_TXCPIN;
 	params.clock_speed = 2400;
 	ioctl(fd, MGSL_IOCSPARAMS, &params);

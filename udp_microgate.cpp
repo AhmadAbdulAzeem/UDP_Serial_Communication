@@ -17,6 +17,9 @@
 // Default max frame size for driver.
 // This can be increased with driver load option.
 #define MAX_FRAME_SIZE 4096
+#define FRAME_SIZE 100
+
+int fd;
 
 using namespace std;
 
@@ -43,8 +46,10 @@ void *send_serial(void *ptr);
 int main()
 {
     pthread_t thread1, thread2;
+    
     pthread_create(&thread2, NULL, serial_thread, NULL);
     pthread_create(&thread1, NULL, network_thread, NULL);
+    
     while (1);
     return 0;
 }
@@ -67,7 +72,12 @@ void *network_thread(void *ptr)
         {
             cout<<"Received network msg\n";
             msg = s->getData();
-            lenght = s->getDataLength();
+            lenght = res;
+            printf("received data length: %d\n", lenght);
+            printf("received data: ");
+            for(int i =0;i<10;i++)
+                printf("%d  ", msg[i]);
+            printf("\n");
             network_to_serial_queue.push({msg, lenght});
         }
     }
@@ -96,7 +106,6 @@ void *send_network(void *ptr)
 void *serial_thread(void *ptr)
 {
     pthread_t thread3;
-    int fd;
     char *devname;
     int rc;
     unsigned char buf[MAX_FRAME_SIZE];
@@ -109,14 +118,14 @@ void *serial_thread(void *ptr)
 		printf("open error=%d %s\n", errno, strerror(errno));
 	}
     configure_port(fd);
-    // signal(SIGINT, sigint_handler);
-	// siginterrupt(SIGINT, 1);
+    signal(SIGINT, sigint_handler);
+	siginterrupt(SIGINT, 1);
     ioctl(fd, MGSL_IOCRXENABLE, 1);
 
     cout<<"Serial node running on: /dev/ttySLG0" << endl;
 
-    
     pthread_create(&thread3, NULL, send_serial, &fd);
+    
 
     while(1)
     {
@@ -134,7 +143,10 @@ void *send_serial(void *ptr)
 {
     cout<<"send serial thread\n";
     int fd = *(int*)ptr;
+    unsigned char buf[FRAME_SIZE];
     pair<unsigned char *, int> msg;
+    for (int i = 0 ; i < FRAME_SIZE ; i++)
+		*(buf + i) = (unsigned char)i;
     while(1)
     {
         if(network_to_serial_queue.size() >0 )
@@ -142,12 +154,15 @@ void *send_serial(void *ptr)
             msg = network_to_serial_queue.front();
             network_to_serial_queue.pop();
             cout<<"Sending serial msg\n";
-            int rc = write(fd, msg.first, msg.second);
+            int rc = write(fd, (unsigned char *)(msg.first), int(msg.second));
+            // int rc = write(fd, buf, FRAME_SIZE);
             if (rc < 0) {
+                cout<<"here continue\n";
                 continue;
             }
             // block until all sent
             tcdrain(fd);
+            cout<<"here after continue\n";
         }
     }
     return NULL;

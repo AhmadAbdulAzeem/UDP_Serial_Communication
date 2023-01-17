@@ -10,6 +10,7 @@
 #include <termios.h>
 #include <errno.h>
 #include <pthread.h>
+#include<unistd.h>
 
 using namespace std;
 
@@ -35,6 +36,7 @@ void *receive_func(void *ptr)
 
 int main()
 {
+	unsigned int microsecond = 1000000;
     UdpServer *s = new UdpServer("127.0.0.1", 15001, "127.0.0.1", 10001);
     int i,rc;
     s->setupUdpSocket();
@@ -53,6 +55,7 @@ int main()
 			break;
 		}
 		i++;
+		usleep(5 * microsecond);//sleeps for 3 second
 	}
     return 0;
 }
